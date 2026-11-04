@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django / SQLite database
+*.sqlite3
+db.sqlite3
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and virtual environments
+.env
+.env.*
+venv/
+.venv/
+env/
+ENV/
+
+# Large installers and archives
+*.msi
+*.exe
+*.rar
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Temporary files (e.g. Office lock files)
+~$*.docx
+~$*.xlsx
+~$*.pptx
+
+# IDE and OS generated files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Log files
+*.log
