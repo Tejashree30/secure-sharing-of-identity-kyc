@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agentic AI Cyber Defense</title>
+<style>
+  :root{--bg:#0e1420;--card:#161e2e;--line:#243049;--text:#e6ebf5;--mute:#8896b3;--ok:#3ecf8e;--bad:#ff5d6c;--warn:#ffb454;--blue:#5aa2ff}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:18px;margin:0}
+  .pill{font-size:12px;padding:3px 10px;border-radius:99px;background:#1f2b44;color:var(--mute);margin-left:6px}
+  .pill.on{background:#12382b;color:var(--ok)}
+  .live{color:var(--ok)} .live::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;animation:p 1.2s infinite}
+  @keyframes p{50%{opacity:.25}}
+  main{padding:18px 22px;display:grid;gap:16px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .kpi b{display:block;font-size:26px} .kpi span{color:var(--mute);font-size:12px}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  @media(max-width:950px){.grid{grid-template-columns:1fr}}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{color:var(--mute);text-align:left;font-weight:500;padding:4px 6px}
+  td{padding:5px 6px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+  tr.threat td:nth-child(5){color:var(--bad);font-weight:600} tr.dropped td{color:var(--warn)} tr.missed td{color:var(--bad)}
+  .scroll{max-height:340px;overflow:auto}
+  .btns{display:flex;flex-wrap:wrap;gap:8px}
+  button{background:#22304d;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit}
+  button:hover{background:#2c3d63} button.small{padding:2px 8px;font-size:12px}
+  .inc{border-top:1px solid var(--line);padding:8px 0}
+  .inc:first-child{border-top:0}
+  .sev{display:inline-block;min-width:22px;text-align:center;border-radius:5px;padding:0 6px;font-weight:700;margin-right:6px}
+  .s1{background:#27406b}.s2{background:#6a5a1c}.s3{background:#7a4414}.s4,.s5{background:#7a1f2a}
+  .mail{border-top:1px solid var(--line);padding:10px 0;white-space:pre-wrap;font-size:13px}
+  .mail:first-child{border-top:0}
+  .meta{color:var(--mute);font-size:12px}
+  canvas{width:100%;height:120px;display:block}
+  .tag{font-size:11px;color:var(--mute)}
+  .empty{color:var(--mute);padding:8px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ Agentic AI Cyber Defense <span class="pill live" id="live">LIVE</span></h1>
+  <div class="meta">uptime <span id="uptime">0s</span>
+    <span class="pill" id="llm">Notices: template</span><span class="pill" id="mail">Email: off</span></div>
+</header>
+<main>
+  <div class="kpis">
+    <div class="card kpi"><b id="k_events">0</b><span>events analysed</span></div>
+    <div class="card kpi"><b id="k_threats" style="color:var(--bad)">0</b><span>threats detected</span></div>
+    <div class="card kpi"><b id="k_blocked" style="color:var(--warn)">0</b><span>sources blocked / isolated</span></div>
+    <div class="card kpi"><b id="k_dropped">0</b><span>malicious packets stopped</span></div>
+    <div class="card kpi"><b id="k_prec">–</b><span>precision (live)</span></div>
+    <div class="card kpi"><b id="k_rec">–</b><span>recall (live)</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Simulate an attack (watch the agent respond)</h2>
+    <div class="btns">
+      <button onclick="atk('port_scan')">Port scan</button>
+      <button onclick="atk('brute_force')">Brute force login</button>
+      <button onclick="atk('ddos')">DDoS flood</button>
+      <button onclick="atk('exfiltration')">Data exfiltration</button>
+      <button onclick="atk('c2_beacon')">Zero-day (unknown C2)</button>
+    </div>
+  </div>
+
+  <div class="card"><h2>Traffic per second</h2><canvas id="chart" width="1100" height="120"></canvas>
+    <div class="tag"><span style="color:var(--blue)">■</span> events &nbsp; <span style="color:var(--bad)">■</span> threats &nbsp; <span style="color:var(--warn)">■</span> dropped</div></div>
+
+  <div class="grid">
+    <div class="card"><h2>Live traffic</h2><div class="scroll"><table><thead><tr><th>Time</th><th>Source</th><th>Destination</th><th>Port</th><th>Verdict</th><th>Type</th><th>Score</th><th>Agent action</th></tr></thead><tbody id="feed"></tbody></table></div></div>
+    <div class="card"><h2>Blocked / isolated</h2><div id="blocked" class="scroll" style="max-height:340px"></div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h2>Incidents (agent decisions)</h2><div id="incidents" class="scroll" style="max-height:420px"></div></div>
+    <div class="card"><h2>Messages sent to data owners</h2><div id="mails" class="scroll" style="max-height:420px"></div></div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+async function atk(k){ await fetch('/api/attack/'+k,{method:'POST'}); }
+async function unblock(ip){ await fetch('/api/unblock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip})}); }
+const pct = v => v==null ? '–' : (v*100).toFixed(1)+'%';
+
+function chart(tl){
+  const c=$('chart'), g=c.getContext('2d'), W=c.width, H=c.height;
+  g.clearRect(0,0,W,H);
+  const max=Math.max(5,...tl.map(t=>t[0]));
+  [[0,'#5aa2ff'],[1,'#ff5d6c'],[2,'#ffb454']].forEach(([i,col])=>{
+    g.beginPath(); g.strokeStyle=col; g.lineWidth=2;
+    tl.forEach((t,x)=>{const px=x*(W/59), py=H-6-(t[i]/max)*(H-14); x?g.lineTo(px,py):g.moveTo(px,py)});
+    g.stroke();
+  });
+}
+
+async function refresh(){
+  let s; try{ s = await (await fetch('/api/state')).json(); }catch(e){ $('live').style.opacity=.3; return; }
+  $('live').style.opacity=1;
+  $('uptime').textContent = s.uptime+'s';
+  $('llm').textContent = 'Notices: ' + (s.llm ? 'Claude' : 'template'); $('llm').classList.toggle('on', s.llm);
+  $('mail').textContent = 'Email: ' + (s.email ? 'on' : 'off');     $('mail').classList.toggle('on', s.email);
+  $('k_events').textContent = s.counters.events; $('k_threats').textContent = s.counters.threats;
+  $('k_blocked').textContent = s.blocked.length + s.isolated.length; $('k_dropped').textContent = s.counters.dropped;
+  $('k_prec').textContent = pct(s.quality.precision); $('k_rec').textContent = pct(s.quality.recall);
+
+  $('feed').innerHTML = s.feed.map(e=>`<tr class="${e.verdict}"><td>${e.time}</td><td>${e.src}</td><td>${e.dst}</td><td>${e.port}</td><td>${e.verdict}</td><td>${esc(e.type)}</td><td>${e.score}</td><td>${esc(e.action)}</td></tr>`).join('');
+
+  const b = [...s.blocked.map(ip=>[ip,'blocked']), ...s.isolated.map(ip=>[ip,'isolated'])];
+  $('blocked').innerHTML = b.length ? `<table><tbody>${b.map(([ip,t])=>`<tr><td>${ip}</td><td>${t}</td><td><button class="small" onclick="unblock('${ip}')">Unblock</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty">Nothing blocked yet.</div>';
+
+  $('incidents').innerHTML = s.incidents.length ? s.incidents.map(i=>`<div class="inc"><span class="sev s${i.severity}">${i.severity}</span><b>${esc(i.threat_type.replace('_',' '))}</b> from ${i.src_ip} → ${i.dst_ip} <span class="meta">(${i.time}, ×${i.count})</span><div class="meta">Actions: ${esc(i.actions.join(', '))}${i.notified?' · owner notified':''}</div></div>`).join('') : '<div class="empty">No incidents yet — try a simulated attack above.</div>';
+
+  $('mails').innerHTML = s.notifications.length ? s.notifications.map(m=>`<div class="mail"><div class="meta">${m.time} · To: <b>${esc(m.owner)}</b> · written by ${esc(m.written_by)} · email: ${esc(m.email_status)}</div>${esc(m.message)}</div>`).join('') : '<div class="empty">No owner messages yet.</div>';
+
+  chart(s.timeline);
+}
+setInterval(refresh, 1000); refresh();
+</script>
+</body>
+</html>
