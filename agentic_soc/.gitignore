@@ -1,8 +1,0 @@
-__pycache__/
-*.pyc
-output/
-venv/
-*.db
-*.db-wal
-*.db-shm
-models/

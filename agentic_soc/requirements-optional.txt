@@ -1,3 +1,0 @@
-# Only needed for optional features
-scapy      # live packet capture (MODE=live, run with sudo)
-xgboost    # python train_real.py --xgb
